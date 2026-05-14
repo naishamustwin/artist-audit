@@ -60,7 +60,7 @@ const ADMIN_PASSWORD = "BACKEND2024";
 
 // ─── ZAPIER WEBHOOK ───────────────────────────────────────────────────────────
 // Paste your Zapier webhook URL here after setting it up (see setup guide below)
-const ZAPIER_WEBHOOK_URL = "YOUR_ZAPIER_WEBHOOK_URL_HERE";
+const ZAPIER_WEBHOOK_URL = "https://hooks.zapier.com/hooks/catch/27607784/4y7s211/";
 // ─────────────────────────────────────────────────────────────────────────────
 
 function calcScore(answers) {
