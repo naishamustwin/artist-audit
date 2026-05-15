@@ -95,13 +95,13 @@ function getMissingItems(answers) {
 
 async function saveSubmission(data) {
   try {
-    const listResult = await window.storage.get("audits:list");
-    const list = listResult ? JSON.parse(listResult.value) : [];
+    const listRaw = localStorage.getItem("audits:list");
+    const list = listRaw ? JSON.parse(listRaw) : [];
     const id = `audit_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const submission = { id, ...data, savedAt: new Date().toISOString() };
-    await window.storage.set(`audits:${id}`, JSON.stringify(submission));
+    localStorage.setItem(`audits:${id}`, JSON.stringify(submission));
     list.push(id);
-    await window.storage.set("audits:list", JSON.stringify(list));
+    localStorage.setItem("audits:list", JSON.stringify(list));
     return true;
   } catch (e) {
     console.error("Storage error:", e);
@@ -153,7 +153,8 @@ async function sendToZapier(data) {
   try {
     await fetch(ZAPIER_WEBHOOK_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(payload)
     });
   } catch (e) {
@@ -163,15 +164,15 @@ async function sendToZapier(data) {
 
 async function loadAllSubmissions() {
   try {
-    const listResult = await window.storage.get("audits:list");
-    if (!listResult) return [];
-    const list = JSON.parse(listResult.value);
+    const listRaw = localStorage.getItem("audits:list");
+    if (!listRaw) return [];
+    const list = JSON.parse(listRaw);
     const subs = [];
     for (const id of list) {
       try {
-        const r = await window.storage.get(`audits:${id}`);
-        if (r) subs.push(JSON.parse(r.value));
-      } catch (e) { /* skip missing */ }
+        const r = localStorage.getItem(`audits:${id}`);
+        if (r) subs.push(JSON.parse(r));
+      } catch (e) { /* skip corrupted entries */ }
     }
     return subs.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
   } catch (e) {
@@ -181,11 +182,11 @@ async function loadAllSubmissions() {
 
 async function deleteSubmission(id) {
   try {
-    const listResult = await window.storage.get("audits:list");
-    if (!listResult) return;
-    const list = JSON.parse(listResult.value).filter(i => i !== id);
-    await window.storage.set("audits:list", JSON.stringify(list));
-    await window.storage.delete(`audits:${id}`);
+    const listRaw = localStorage.getItem("audits:list");
+    if (!listRaw) return;
+    const list = JSON.parse(listRaw).filter(i => i !== id);
+    localStorage.setItem("audits:list", JSON.stringify(list));
+    localStorage.removeItem(`audits:${id}`);
   } catch (e) { console.error(e); }
 }
 
