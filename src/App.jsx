@@ -151,11 +151,11 @@ async function sendToZapier(data) {
     source: "Artist Backend Audit — 50 Artists in 5 Days Campaign"
   };
   try {
+    const formData = new URLSearchParams();
+    Object.entries(payload).forEach(([k, v]) => formData.append(k, String(v)));
     await fetch(ZAPIER_WEBHOOK_URL, {
       method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(payload)
+      body: formData
     });
   } catch (e) {
     console.error("Zapier webhook error:", e);
